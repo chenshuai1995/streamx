@@ -48,8 +48,8 @@ object CommonConfig {
 
   val DOCKER_MAX_CONNECTIONS: ConfigOption = ConfigOption(
     key = "streamx.docker.http-client.max-connections",
-    defaultValue = 100L,
-    classType = classOf[java.lang.Long],
+    defaultValue = 100,
+    classType = classOf[java.lang.Integer],
     description = "instantiating max connections for DockerHttpClient")
 
   val DOCKER_CONNECTION_TIMEOUT_SEC: ConfigOption = ConfigOption(
@@ -65,8 +65,20 @@ object CommonConfig {
     description = "instantiating connection timeout for DockerHttpClient")
 
   val MAVEN_REMOTE_URL: ConfigOption = ConfigOption(
-    key = "streamx.maven.remote-url",
+    key = "streamx.maven.central.repository",
     defaultValue = "https://repo1.maven.org/maven2/",
+    classType = classOf[java.lang.String],
+    description = "maven repository used for built-in compilation")
+
+  val MAVEN_AUTH_USER: ConfigOption = ConfigOption(
+    key = "streamx.maven.auth.user",
+    defaultValue = null,
+    classType = classOf[java.lang.String],
+    description = "maven repository used for built-in compilation")
+
+  val MAVEN_AUTH_PASSWORD: ConfigOption = ConfigOption(
+    key = "streamx.maven.auth.password",
+    defaultValue = null,
     classType = classOf[java.lang.String],
     description = "maven repository used for built-in compilation")
 

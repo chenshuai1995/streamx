@@ -5,7 +5,7 @@
         <img width="500" src="https://user-images.githubusercontent.com/13284744/142753483-4e96eb33-01ee-469d-ad7c-387e1bf95ee1.png" alt="StreamX logo">
         </a>
     </h1>
-    <strong>Make Flink|Spark easier!!!</strong>
+    <strong>Make stream processing easier!!!</strong>
 </div>
 
 <br/>
@@ -23,25 +23,23 @@
 
 **[官网](http://www.streamxhub.com)** |
 **[更新日志](#)** |
-**[使用文档](http://www.streamxhub.com/zh/doc)**
+**[使用文档](https://www.streamxhub.com/zh-CN/docs/intro)**
 
 </div>
 
-##[English](README.md) | 中文
+[English](README.md) | 中文
 
 # StreamX
 
-Make Flink|Spark easier!!!
+Make stream processing easier
 
-> 一个神奇的框架，让 Flink|Spark 开发更简单
+> 一个神奇的框架，让流处理更简单
 
 ## 🚀 什么是StreamX
 
-&nbsp;&nbsp;&nbsp;&nbsp;大数据技术如今发展的如火如荼，已经呈现百花齐放欣欣向荣的景象，实时处理流域 `Apache Spark` 和 `Apache Flink`
-更是一个伟大的进步，尤其是 `Apache Flink` 被普遍认为是下一代大数据流计算引擎， 我们在使用 `Flink` 时发现从编程模型， 启动配置到运维管理都有很多可以抽象共用的地方， 我们将一些好的经验固化下来并结合业内的最佳实践， 通过不断努力终于诞生了今天的框架
-—— `StreamX`， 项目的初衷是 —— 让 `Flink` 开发更简单， 使用 `StreamX` 开发，可以极大降低学习成本和开发门槛， 让开发者只用关心最核心的业务， `StreamX`
-规范了项目的配置，鼓励函数式编程，定义了最佳的编程方式，提供了一系列开箱即用的 `Connectors` ，标准化了配置、开发、测试、部署、监控、运维的整个过程， 提供 `Scala` 和 `Java` 两套api，
-其最终目的是打造一个一站式大数据平台，流批一体，湖仓一体的解决方案
+实时即未来, 在实时处理流域 `Apache Spark` 和 `Apache Flink` 是一个伟大的进步,尤其是 `Apache Flink` 被普遍认为是下一代大数据流计算引擎, 我们在使用 `Flink` & `Spark` 时发现从编程模型, 参数配置到项目部署, 运维管理都有很多可以抽象共用的地方, 
+我们将一些好的经验固化下来并结合业内的最佳实践, 通过不断努力终于诞生了今天的框架 —— `StreamX`, 项目的初衷是 —— 让流处理更简单, 使用 `StreamX` 开发, 可以极大降低学习成本和开发门槛, 让开发者只用关心最核心的业务, `StreamX` 规范了项目的配置,
+鼓励函数式编程, 定义了最佳的编程方式, 提供了一系列开箱即用的 `Connectors`, 标准化了配置、开发、测试、部署、监控、运维的整个过程, 提供了 Scala/Java 两套 api, 其最终目的是打造一个一站式大数据平台, 流批一体,湖仓一体的解决方案
 
 [![StreamX video](https://user-images.githubusercontent.com/13284744/142747056-d220d69b-7f2a-447d-aeca-bc5435c8e29b.png)](http://assets.streamxhub.com/streamx-video.mp4)
 
@@ -55,9 +53,10 @@ Make Flink|Spark easier!!!
 * 支持项目编译功能(maven 编译)
 * 在线参数配置
 * 多版本flink支持(1.12.x,1.13.x,1.14.x)
-* on Kubernetes部署模式支持(`K8s-Native-Application`/`K8s-Native-Session`)
-* on YARN部署模式支持(`YARN-Application`/`YARN-Per-Job`)
 * 快捷的日常操作(任务`启动`、`停止`、`savepoint`，从`savepoint`恢复)
+* Flink所有部署模式的支持(`Remote`/`K8s-Native-Application`/`K8s-Native-Session`/`YARN-Application`/`YARN-Per-Job`/`YARN-Session`)
+* 快捷的日常操作(任务`启动`、`停止`、`savepoint`，从`savepoint`恢复)
+* 稳定可靠,诸多公司和组织将 `StreamX` 用于生产和商业产品中
 * 支持火焰图
 * 支持 `notebook` (在线任务开发)
 * 项目配置和依赖版本化管理
@@ -110,9 +109,7 @@ Make Flink|Spark easier!!!
 * [Monaco Editor](https://microsoft.github.io/monaco-editor/)
 * ...
 
-感谢以上优秀的开源项目和很多未提到的优秀开源项目，致以最崇高的敬意，特别感谢[Apache Zeppelin](http://zeppelin.apache.org)
-，[IntelliJ IDEA](https://www.jetbrains.com/idea/)，
-感谢 [fire-spark](https://github.com/GuoNingNing/fire-spark) 项目，早期给予的灵感和帮助， 感谢我老婆在项目开发时给予的支持，悉心照顾我的生活和日常，给予我足够的时间开发这个项目
+感谢以上优秀的开源项目和很多未提到的优秀开源项目，致以最崇高的敬意，感谢 [Apache Flink](http://flink.apache.org) 创造了一个了不起的项目! 感谢 [Apache Zeppelin](http://zeppelin.apache.org) 早期给予的灵感，感谢我老婆在项目开发时给予的支持，悉心照顾我的生活和日常，给予我足够的时间开发这个项目!
 
 ### 🚀 快速上手
 
@@ -124,23 +121,16 @@ mvn clean install -DskipTests -Denv=prod
 
 更多请查看[官网文档](http://www.streamxhub.com/zh/doc/)
 
-## 👻 为什么不是...❓
 
-### Apache Zeppelin
 
-[Apache Zeppelin](http://zeppelin.apache.org)是一个非常优秀的开源项目👏 对 `Flink` 做了很好的支持，`Zeppelin` 创新型的 `notebook`
-功能，让开发者非常方便的 `On-line` 编程，快捷的提交任务，语言层面同时支持`Java`，`Scala`，`Python`，国内阿里的章剑峰大佬也在积极推动该项目，向剑峰大佬致以崇高的敬意🙏🙏🙏，
-但该项目目前貌似没有解决项目的管理和运维方面的痛点，针对比较复杂的项目和大量的作业管理就有些力不从心了，一般来讲不论是 `DataStream` 作业还是 `Flink SQL` 作业，大概都会经历作业的`开发阶段`，`测试阶段`
-，`打包阶段`，`上传服务器阶段`，`启动任务阶段`等这些步骤，这是一个链路很长的步骤，且整个过程耗时比较长，体验不好，
-即使修改了一个符号，项目改完上线都得走上面的流程，我们期望这些步骤能够动动鼠标一键式解决，还希望至少能有一个任务列表的功能，能够方便的管理任务，可以清楚的看到哪些任务正在运行，哪些停止了，任务的资源消耗情况，可以在任务列表页面一键`启动`
-或`停止`任务，并且自动管理 `savePoint`，这些问题也是开发者实际开发中会遇到了问题，
-`streamx-console` 很好的解决了这些痛点，定位是一个一站式实时数据平台，并且开发了更多令人激动的功能(诸如`Flink SQL WebIDE`，`依赖隔离`，`任务回滚`，`火焰图`等)
 
-### FlinkX
+## 💋 谁在使用
 
-[FlinkX](http://github.com/DTStack/flinkx)
-是基于flink的分布式数据同步工具，实现了多种异构数据源之间高效的数据迁移，定位比较明确，专门用来做数据抽取和迁移，可以作为一个服务组件来使用，`StreamX` 关注开发阶段和任务后期的管理，定位有所不同，`streamx-pump`
-模块也在规划中， 致力于解决数据源抽取和迁移，最终会集成到 `streamx-console` 中
+诸多公司和组织将 StreamX 用于研究、生产和商业产品中, 如果您也在使用 ? 可以在[这里添加](https://github.com/streamxhub/streamx/issues/163)
+
+![image](https://user-images.githubusercontent.com/13284744/160220085-11f1e011-e7a0-421f-9294-c14213c0bc22.png)
+
+
 
 
 ## 🤝 如何贡献
@@ -208,6 +198,6 @@ StreamX现在离这个目标还有一段距离，还需持续投入，相应的�
 </div>
 
 <div align="center">
-    <img src="https://user-images.githubusercontent.com/13284744/142746862-42e9e2d8-b574-4253-8aea-bf4d96c56088.jpeg" alt="关注我们" height="250px"><br>
+    <img src="https://user-images.githubusercontent.com/13284744/152627523-de455a4d-97c7-46cd-815f-3328a3fe3663.png" alt="关注我们" height="300px"><br>
 </div>
 

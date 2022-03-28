@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-plugin</artifactId>
-        <version>1.2.1</version>
+        <version>1.2.3</version>
     </parent>
 
     <artifactId>streamx-flink-kubernetes</artifactId>
@@ -63,6 +63,12 @@
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5-fluent</artifactId>
             <version>${apache.httpclient5.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.json4s</groupId>
+            <artifactId>json4s-jackson_${scala.binary.version}</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <!-- snake yaml -->

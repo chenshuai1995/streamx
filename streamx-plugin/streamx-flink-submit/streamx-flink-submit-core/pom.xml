@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-flink-submit</artifactId>
-        <version>1.2.1</version>
+        <version>1.2.3</version>
     </parent>
 
     <artifactId>streamx-flink-submit-core</artifactId>
@@ -70,15 +70,5 @@
         </dependency>
 
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

@@ -25,9 +25,12 @@ import com.streamxhub.streamx.console.base.domain.router.VueRouter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TreeUtils {
+/**
+ * @author benjobs
+ */
+public final class TreeUtils {
 
-    protected TreeUtils() {
+    private TreeUtils() {
     }
 
     private static final String TOP_NODE_ID = "0";
@@ -113,7 +116,7 @@ public class TreeUtils {
 
         ArrayList<VueRouter<T>> list = new ArrayList<>();
         VueRouter<T> root = new VueRouter<>();
-        root.setName("主页");
+        root.setName("Root");
         root.setComponent("BasicView");
         root.setPath("/");
         root.setChildren(topRoutes);

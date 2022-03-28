@@ -5,7 +5,7 @@
         <img width="500" src="https://user-images.githubusercontent.com/13284744/142753483-4e96eb33-01ee-469d-ad7c-387e1bf95ee1.png" alt="StreamX logo">
         </a>
     </h1>
-    <strong>Make Flink|Spark easier!!!</strong>
+    <strong>Make stream processing easier!!!</strong>
 </div>
 
 <br/>
@@ -23,7 +23,7 @@
 
 **[Official Website](http://www.streamxhub.com)** |
 **[Change Log](#)** |
-**[Document](http://www.streamxhub.com/zh/doc/)**
+**[Document](https://www.streamxhub.com/docs/intro)**
 
 </div>
 
@@ -31,13 +31,13 @@ English | [中文](README_CN.md)
 
 # StreamX
 
-Make Flink|Spark easier
+Make stream processing easier
 
-> A magical framework that makes Flink development easier
+> A magical framework that make stream processing easier!
 
 ## 🚀 Introduction
 
-The original intention of `StreamX` is to make the development of `Flink` easier. `StreamX` focuses on the management of development phases
+The original intention of `StreamX` is to make stream processing easier. `StreamX` focuses on the management of development phases
 and tasks. Our ultimate goal is to build a one-stop big data solution integrating stream processing, batch processing, data warehouse and
 data laker.
 
@@ -53,10 +53,9 @@ data laker.
 * Support maven compilation
 * Configuration
 * Multi version flink support(1.12.x,1.13.x,1.14.x)
-* on Kubernetes deployment (`K8s-Native-Application`/`K8s-Native-Session`)
-* on YARN deployment (`YARN-Application`/`YARN-Per-Job`)
-* Support `Applicaion` and `Yarn-Per-Job` mode
+* All Flink deployment mode support(`Remote`/`K8s-Native-Application`/`K8s-Native-Session`/`YARN-Application`/`YARN-Per-Job`/`YARN-Session`)
 * `start`, `stop`, `savepoint`, resume from `savepoint`
+* Various companies and organizations use `StreamX` for production and commercial products.
 * Flame graph
 * Notebook
 * Project configuration and dependency version management
@@ -118,9 +117,7 @@ Our ultimate goal is to build a one-stop big data solution integrating stream pr
 * ...
 
 Thanks to the above excellent open source projects and many outstanding open source projects that are not mentioned, for giving the greatest
-respect, special thanks to [Apache Zeppelin](http://zeppelin.apache.org)
-, [IntelliJ IDEA](https://www.jetbrains.com/idea/), Thanks to the [fire-spark](https://github.com/GuoNingNing/fire-spark) project for the
-early inspiration and help.
+respect,Thanks to [Apache Flink](http://flink.apache.org) for creating a great project!  Thanks to the [Apache Zeppelin](http://zeppelin.apache.org) project for the early inspiration.
 
 ### 🚀 Quick Start
 
@@ -130,27 +127,15 @@ cd streamx
 ./mvnw clean install -DskipTests -Denv=prod
 ```
 
-click [Document](http://www.streamxhub.com/zh/doc/) for more information
+click [Document](http://www.streamxhub.com/zh-CN/docs/intro/) for more information
 
-## 👻 Why not...❓
 
-### Apache Zeppelin
+## 💋 out users
 
-[Apache Zeppelin](https://zeppelin.apache.org) is a Web-based notebook that enables data-driven, interactive data analytics and
-collaborative documents with SQL, Java, Scala and more.
+Various companies and organizations use StreamX for research, production and commercial products. Are you using this project ? [you can add your company](https://github.com/streamxhub/streamx/issues/163)
 
-At the same time we also need a one-stop tool that can cover `development`, `test`, `package`, `deploy`, and `start`.
-`streamx-console` solves these pain points very well, positioning is a one-stop stream processing platform, and has developed more exciting
-features (such as `Flink SQL WebIDE`, `dependency isolation`, `task rollback `, `flame diagram`
-etc.)
+![image](https://user-images.githubusercontent.com/13284744/160220085-11f1e011-e7a0-421f-9294-c14213c0bc22.png)
 
-### FlinkX
-
-[FlinkX](http://github.com/DTStack/flinkx) is a distributed offline and real-time data synchronization framework based on flink widely used
-in DTStack, which realizes efficient data migration between multiple heterogeneous data sources.
-
-`StreamX` focuses on the management of development phases and tasks. The `streamx-pump` module is also under planning, dedicated to solving
-data source migration, and will eventually be integrated into the `streamx-console`.
 
 
 ## 🤝 Contributing
@@ -220,7 +205,7 @@ Thank you to all our backers!
 </div>
 
 <div align="center">
-    <img src="https://user-images.githubusercontent.com/13284744/142746862-42e9e2d8-b574-4253-8aea-bf4d96c56088.jpeg" alt="Join the Group" height="250px"><br>
+    <img src="https://user-images.githubusercontent.com/13284744/152627523-de455a4d-97c7-46cd-815f-3328a3fe3663.png" alt="Join the Group" height="300px"><br>
 </div>
 
 

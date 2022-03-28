@@ -17,19 +17,21 @@
  * limitations under the License.
  */
 
-package com.streamxhub.streamx.flink.submit.domain
+package com.streamxhub.streamx.console.core.service;
 
-import com.streamxhub.streamx.common.conf.K8sFlinkConfig
-import com.streamxhub.streamx.common.domain.FlinkVersion
-import com.streamxhub.streamx.common.enums.ExecutionMode
+import com.streamxhub.streamx.console.system.entity.User;
 
-case class StopRequest(flinkVersion: FlinkVersion,
-                       executionMode: ExecutionMode,
-                       clusterId: String,
-                       jobId: String,
-                       withSavePoint: Boolean,
-                       withDrain: Boolean,
-                       customSavePointPath: String,
-                       kubernetesNamespace: String = K8sFlinkConfig.DEFAULT_KUBERNETES_NAMESPACE) {
+public interface CommonService {
 
+    /**
+     * get login user
+     * @return
+     */
+    User getCurrentUser();
+
+    /**
+     * get sqlclient
+     * @return
+     */
+    String getSqlClientJar();
 }

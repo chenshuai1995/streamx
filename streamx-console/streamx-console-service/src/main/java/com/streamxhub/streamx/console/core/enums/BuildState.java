@@ -25,63 +25,35 @@ import java.util.Arrays;
 /**
  * @author benjobs
  */
-public enum DeployState implements Serializable {
+public enum BuildState implements Serializable {
 
     /**
-     * 需用重新发布,但是下载maven依赖失败.(针对flinkSql任务)
+     * 发生变更,需重新build
      */
-    NEED_DEPLOY_DOWN_DEPENDENCY_FAILED(-1),
-    /**
-     * 完结
-     */
-    DONE(0),
-
-    /**
-     * 正在部署中
-     */
-    DEPLOYING(1),
-
-    /**
-     * 程序更新需要重新发布
-     */
-    NEED_DEPLOY_AFTER_BUILD(2),
-
-    /**
-     * 依赖更新需要重新发布
-     */
-    NEED_DEPLOY_AFTER_DEPENDENCY_UPDATE(3),
-
-    /**
-     * 配置文件更新需要重新启动
-     */
-    NEED_RESTART_AFTER_CONF_UPDATE(4),
-
-    /**
-     * sql更新需要重新启动
-     */
-    NEED_RESTART_AFTER_SQL_UPDATE(5),
-
-    /**
-     * 发布完成,需要重新启动.
-     */
-    NEED_RESTART_AFTER_DEPLOY(6),
-
-    //需要回滚
-    NEED_ROLLBACK(7),
-
-    /**
-     * 回滚完成,需要重新启动
-     */
-    NEED_RESTART_AFTER_ROLLBACK(8),
-
+    NEED_REBUILD(-2),
     /**
      * 发布的任务已经撤销
      */
-    REVOKED(8);
+    NOT_BUILD(-1),
 
-    int value;
+    /**
+     * 正在构建
+     */
+    BUILDING(0),
 
-    DeployState(int value) {
+    /**
+     * 构建成功
+     */
+    SUCCESSFUL(1),
+
+    /**
+     * 构建失败
+     */
+    FAILED(2);
+
+    private final int value;
+
+    BuildState(int value) {
         this.value = value;
     }
 
@@ -89,7 +61,7 @@ public enum DeployState implements Serializable {
         return this.value;
     }
 
-    public static DeployState of(Integer state) {
+    public static BuildState of(Integer state) {
         return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
     }
 }
