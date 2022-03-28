@@ -101,6 +101,7 @@ object FlinkSqlValidator extends Logger {
             try {
               command match {
                 case CREATE_VIEW => parser.parse(last)
+                case USE_CATALOG => parser.parse(call.originSql)
                 case _ => parser.parse(args)
               }
             } catch {
