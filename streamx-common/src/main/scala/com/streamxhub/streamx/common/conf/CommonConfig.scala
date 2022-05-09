@@ -72,13 +72,13 @@ object CommonConfig {
 
   val MAVEN_AUTH_USER: ConfigOption = ConfigOption(
     key = "streamx.maven.auth.user",
-    defaultValue = null,
+    defaultValue = "myuser",
     classType = classOf[java.lang.String],
     description = "maven repository used for built-in compilation")
 
   val MAVEN_AUTH_PASSWORD: ConfigOption = ConfigOption(
     key = "streamx.maven.auth.password",
-    defaultValue = null,
+    defaultValue = "mypassword",
     classType = classOf[java.lang.String],
     description = "maven repository used for built-in compilation")
 
