@@ -80,6 +80,7 @@ trait FlinkSubmitTrait extends Logger {
          |    args             : ${submitRequest.args}
          |    appConf          : ${submitRequest.appConf}
          |    flinkBuildResult : ${submitRequest.buildResult}
+         |    flinkYaml        : ${submitRequest.flinkYaml}
          |-------------------------------------------------------------------------------------------
          |""".stripMargin)
 
@@ -309,6 +310,19 @@ trait FlinkSubmitTrait extends Logger {
     customCommandLines
   }
 
+  def getDynamicOptionMap(dynamicOption: Array[String]) = {
+    val dynamicOptionMap = new scala.collection.mutable.HashMap[String, String]
+
+    for (i <- 0 to dynamicOption.length -1) {
+      // -Dparallelism.default=2
+      val line = dynamicOption.apply(i)
+      val key = line.split("=").apply(0).substring(2)
+      val value = line.split("=").apply(1)
+      dynamicOptionMap(key) = value
+    }
+    dynamicOptionMap
+  }
+
   private[submit] def getParallelism(submitRequest: SubmitRequest): Integer = {
     if (submitRequest.option.containsKey(KEY_FLINK_PARALLELISM())) {
       Integer.valueOf(submitRequest.option.get(KEY_FLINK_PARALLELISM()).toString)
@@ -317,6 +331,8 @@ trait FlinkSubmitTrait extends Logger {
         CoreOptions.DEFAULT_PARALLELISM,
         CoreOptions.DEFAULT_PARALLELISM.defaultValue()
       )
+      val parallelismStr = getDynamicOptionMap(submitRequest.dynamicOption).get("parallelism.default").get
+      Integer.valueOf(parallelismStr.toString)
     }
   }
 
