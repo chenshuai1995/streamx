@@ -20,6 +20,12 @@
           @click="handleView"
           :disabled="this.app.state !== 5 || (this.yarn === null && this.app.flinkRestUrl === null)"
           style="float: right;margin-top: -8px;margin-right: 20px">Flink Web UI</a-button>
+        <a-button
+          type="primary"
+          icon="monitor"
+          @click="handleMonitor"
+          :disabled="this.app.state !== 5 || (this.yarn === null && this.app.flinkRestUrl === null)"
+          style="float: right;margin-top: -8px;margin-right: 20px">Flink Promethues UI</a-button>
         <a-divider
           style="margin-top: 5px;margin-bottom: -5px" />
       </template>
@@ -1027,6 +1033,11 @@ export default {
       yarn({}).then((resp) => {
         this.yarn = resp.data
       })
+    },
+
+    handleMonitor() {
+      const monitor_url = 'http://wx12-test-hadoop003:3000/d/wKbnD5Gnk/apache-flink-2021-dashboard-for-job-task-manager?orgId=1&var-Source=Prometheus&var-tm_id=All&var-jm_instance='+ this.app.jobName +'&var-job_name=All&var-task_name=All'
+      window.open(monitor_url)
     },
 
     handleView() {
