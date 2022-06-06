@@ -34,6 +34,7 @@ import com.streamxhub.streamx.console.core.service.AppBuildPipeService;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.ApplicationLogService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
+import com.streamxhub.streamx.console.core.service.MetaTableService;
 import com.streamxhub.streamx.flink.packer.pipeline.PipelineStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -72,6 +73,9 @@ public class ApplicationController {
 
     @Autowired
     private AppBuildPipeService appBuildPipeService;
+
+    @Autowired
+    private MetaTableService metaTableService;
 
     @PostMapping("get")
     @RequiresPermissions("app:detail")
@@ -149,6 +153,7 @@ public class ApplicationController {
             applicationService.checkEnv(app);
             applicationService.starting(app);
             applicationService.start(app, false);
+            metaTableService.create(app);
             return RestResponse.create().data(true);
         } catch (Exception e) {
             return RestResponse.create().data(false).message(e.getMessage());

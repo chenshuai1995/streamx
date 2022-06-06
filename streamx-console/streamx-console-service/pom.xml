@@ -23,6 +23,7 @@
         <scala.version>2.11.12</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
         <junit.version>4.13.1</junit.version>
+        <flink.version>1.13.6</flink.version>
 
         <streamx.flink.shims.version>1.14</streamx.flink.shims.version>
         <frontend.project.name>streamx-console-webapp</frontend.project.name>
@@ -419,6 +420,17 @@
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-scala_2.11</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-planner-blink_2.11</artifactId>
+            <version>${flink.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-shaded-guava</artifactId>
+            <version>18.0-13.0</version>
         </dependency>
 
     </dependencies>
