@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.streamxhub.streamx.console.core.dao.MonitorKafkaDefineMapper">
+
+    <select id="page" resultType="com.streamxhub.streamx.console.core.entity.MonitorKafkaDefine" parameterType="monitorKafkaDefine">
+        SELECT t.*,u.username FROM t_monitor_kafka_define t
+        inner join t_user u
+        on t.maintain_by = u.user_id
+        <where>
+            <if test="monitorKafkaDefine.appName != null and monitorKafkaDefine.appName != ''">
+                AND t.app_name like '%${monitorKafkaDefine.appName}%'
+            </if>
+            <if test="monitorKafkaDefine.topic != null and monitorKafkaDefine.topic != ''">
+                AND t.topic = #{monitorKafkaDefine.topic}
+            </if>
+            <if test="monitorKafkaDefine.group != null and monitorKafkaDefine.group != ''">
+                AND t.group = #{monitorKafkaDefine.group}
+            </if>
+            <if test="monitorKafkaDefine.release != null and monitorKafkaDefine.release != ''">
+                AND t.release = #{monitorKafkaDefine.release}
+            </if>
+            <if test="monitorKafkaDefine.deleted != null and monitorKafkaDefine.deleted != ''">
+                AND t.deleted = #{monitorKafkaDefine.deleted}
+            </if>
+            <if test="monitorKafkaDefine.maintainName != null and monitorKafkaDefine.maintainName != ''">
+                AND t.maintain_name = #{monitorKafkaDefine.maintainName}
+            </if>
+        </where>
+    </select>
+
+</mapper>

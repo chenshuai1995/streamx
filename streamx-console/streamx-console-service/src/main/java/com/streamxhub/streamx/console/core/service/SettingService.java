@@ -45,6 +45,8 @@ public interface SettingService extends IService<Setting> {
     String KEY_DOCKER_REGISTER_USER = "docker.register.user";
     String KEY_DOCKER_REGISTER_PASSWORD = "docker.register.password";
 
+    String KEY_ALERT_WEBHOOK_URL = "alert.webhook.url";
+
     /**
      * @param key
      * @return
@@ -72,5 +74,7 @@ public interface SettingService extends IService<Setting> {
     String getDockerRegisterUser();
 
     String getDockerRegisterPassword();
+
+    String getAlertWebhookUrl();
 
 }

@@ -148,4 +148,8 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         return settings.get(SettingService.KEY_MAVEN_AUTH_PASSWORD).getValue();
     }
 
+    public String getAlertWebhookUrl() {
+        return settings.get(SettingService.KEY_ALERT_WEBHOOK_URL).getValue();
+    }
+
 }

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.streamxhub.streamx.console.core.dao.MonitorDefineMapper">
+
+    <select id="page" resultType="com.streamxhub.streamx.console.core.entity.MonitorDefine" parameterType="monitorDefine">
+        SELECT t.*,u.username FROM t_monitor_define t
+        inner join t_user u
+        on t.maintain_by = u.user_id
+        <where>
+            <if test="monitorDefine.executionMode != null and monitorDefine.executionMode != ''">
+                AND t.execution_mode = #{monitorDefine.executionMode}
+            </if>
+            <if test="monitorDefine.appName != null and monitorDefine.appName != ''">
+                AND t.app_name like '%${monitorDefine.appName}%'
+            </if>
+            <if test="monitorDefine.recoverStartNode != null and monitorDefine.recoverStartNode != ''">
+                AND p.recover_start_node like '%${monitorDefine.recoverStartNode}%'
+            </if>
+            <if test="monitorDefine.alarmLevel != null and monitorDefine.alarmLevel != ''">
+                AND t.alarm_level = #{monitorDefine.alarmLevel}
+            </if>
+            <if test="monitorDefine.expectInstance != null and monitorDefine.expectInstance != ''">
+                AND t.expect_instance = #{monitorDefine.expectInstance}
+            </if>
+            <if test="monitorDefine.release != null and monitorDefine.release != ''">
+                AND t.`release` = #{monitorDefine.release}
+            </if>
+            <if test="monitorDefine.deleted != null and monitorDefine.deleted != ''">
+                AND t.deleted = #{monitorDefine.deleted}
+            </if>
+            <if test="monitorDefine.maintainName != null and monitorDefine.maintainName != ''">
+                AND t.maintain_name = #{monitorDefine.maintainName}
+            </if>
+        </where>
+    </select>
+
+</mapper>

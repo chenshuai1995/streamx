@@ -66,6 +66,12 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
         if (isLoginAttempt(request, response)) {
             return executeLogin(request, response);
         }
+
+        String requestURI = ((HttpServletRequest) request).getRequestURI();
+        if (requestURI.startsWith("/monitor")) {
+            return true;
+        }
+
         return false;
     }
 
