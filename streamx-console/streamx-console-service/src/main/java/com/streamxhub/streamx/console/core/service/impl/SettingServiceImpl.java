@@ -152,4 +152,8 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         return settings.get(SettingService.KEY_ALERT_WEBHOOK_URL).getValue();
     }
 
+    public Integer getCheckpointStateSizeMb() {
+        return Integer.parseInt(settings.get(SettingService.KEY_CHECKPOINT_STATE_SIZE_MB).getValue());
+    }
+
 }

@@ -29,6 +29,10 @@ export function activeURL(params) {
   return http.post(api.FlinkCluster.ACTIVEURL, params)
 }
 
+export function monitorURL(params) {
+  return http.post(api.FlinkCluster.MONITORURL, params)
+}
+
 export function check(params) {
   return http.post(api.FlinkCluster.CHECK, params)
 }

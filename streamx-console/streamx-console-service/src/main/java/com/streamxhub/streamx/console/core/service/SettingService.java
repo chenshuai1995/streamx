@@ -46,6 +46,7 @@ public interface SettingService extends IService<Setting> {
     String KEY_DOCKER_REGISTER_PASSWORD = "docker.register.password";
 
     String KEY_ALERT_WEBHOOK_URL = "alert.webhook.url";
+    String KEY_CHECKPOINT_STATE_SIZE_MB = "checkpoint.state.size.mb";
 
     /**
      * @param key
@@ -76,5 +77,7 @@ public interface SettingService extends IService<Setting> {
     String getDockerRegisterPassword();
 
     String getAlertWebhookUrl();
+
+    Integer getCheckpointStateSizeMb();
 
 }

@@ -19,10 +19,14 @@
 
 package com.streamxhub.streamx.console.core.controller;
 
+import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkCluster;
+import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.FlinkClusterService;
+import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -32,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.net.MalformedURLException;
 import java.util.List;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 /**
  * @author benjobs
@@ -45,6 +50,12 @@ public class FlinkClusterController {
     @Autowired
     private FlinkClusterService flinkClusterService;
 
+    @Autowired
+    private ApplicationService applicationService;
+
+    @Autowired
+    private SettingService settingService;
+
     @PostMapping("list")
     public RestResponse list() {
         List<FlinkCluster> flinkClusters = flinkClusterService.list();
@@ -53,6 +64,30 @@ public class FlinkClusterController {
 
     @PostMapping("activeUrl")
     public RestResponse activeUrl(Long id) throws MalformedURLException {
+        FlinkCluster cluster = flinkClusterService.getById(id);
+        return RestResponse.create().data(cluster.getActiveAddress().toURL());
+    }
+
+    @PostMapping("monitorUrl")
+    public RestResponse monitorUrl(Long id) throws MalformedURLException {
+        Application application = applicationService.getById(id);
+
+        // TODO 判断当前环境 测试，生产
+        String uriString = ServletUriComponentsBuilder.fromCurrentRequestUri().toUriString();
+        if (uriString.contains("streamx")) {
+
+        } else {
+
+        }
+
+
+        if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
+
+        } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
+
+        }
+
+
         FlinkCluster cluster = flinkClusterService.getById(id);
         return RestResponse.create().data(cluster.getActiveAddress().toURL());
     }

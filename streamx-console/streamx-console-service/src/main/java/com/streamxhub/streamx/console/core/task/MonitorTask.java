@@ -2,14 +2,26 @@ package com.streamxhub.streamx.console.core.task;
 
 import static com.streamxhub.streamx.console.core.task.K8sFlinkTrkMonitorWrapper.Bridge.toTrkId;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
+import com.streamxhub.streamx.common.util.HadoopUtils;
+import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.YarnUtils;
+import com.streamxhub.streamx.console.base.util.JacksonUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.MonitorDefine;
 import com.streamxhub.streamx.console.core.entity.MonitorInstance;
 import com.streamxhub.streamx.console.core.entity.MonitorKafkaDefine;
 import com.streamxhub.streamx.console.core.entity.MonitorKafkaInstance;
+import com.streamxhub.streamx.console.core.enums.FlinkAppState;
+import com.streamxhub.streamx.console.core.metrics.flink.Backpressure;
+import com.streamxhub.streamx.console.core.metrics.flink.Backpressure.Subtask;
+import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
+import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints.CheckPoint;
+import com.streamxhub.streamx.console.core.metrics.flink.JobsJobId;
+import com.streamxhub.streamx.console.core.metrics.flink.JobsJobId.Vertice;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.MonitorDefineService;
 import com.streamxhub.streamx.console.core.service.MonitorInstanceService;
@@ -22,6 +34,7 @@ import com.streamxhub.streamx.console.core.utils.PlatformMessage;
 import com.streamxhub.streamx.console.system.entity.User;
 import com.streamxhub.streamx.console.system.service.UserService;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
+import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -34,9 +47,14 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.runtime.rest.messages.JobVertexBackPressureInfo.VertexBackPressureLevel;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.ListConsumerGroupOffsetsResult;
@@ -82,7 +100,10 @@ public class MonitorTask {
     @Autowired
     private SettingService settingService;
 
-    @Scheduled(cron = "*/10 * * * * ?")
+    private Integer ALARM_WARN_LEVEL = 2;
+    private Integer ALARM_ERROR_LEVEL = 3;
+
+    @Scheduled(cron = "${monitor.job.cron}")
     public void jobStatus() {
         List<MonitorDefine> onlines = monitorDefineService.getOnlines();
         if (onlines != null && onlines.size() > 0) {
@@ -101,7 +122,7 @@ public class MonitorTask {
         }
     }
 
-    //    @Scheduled(cron = "*/10 * * * * ?")
+    @Scheduled(cron = "${monitor.kafka.cron}")
     public void kafkaLag() {
         List<MonitorKafkaDefine> onlines = monitorKafkaDefineService.getOnlines();
         if (onlines != null && onlines.size() > 0) {
@@ -121,6 +142,162 @@ public class MonitorTask {
         }
 
 
+    }
+
+//    @Scheduled(cron = "${monitor.health.cron}")
+    @Scheduled(cron = "*/10 * * * * ?")
+    public void healthCheck() {
+        List<MonitorDefine> onlines = monitorDefineService.getOnlines();
+        if (onlines != null && onlines.size() > 0) {
+            for (MonitorDefine define : onlines) {
+                String appName = define.getAppName();
+                Integer executionMode = define.getExecutionMode();
+                User user = userService.findByName(define.getMaintainName());
+
+                checkCheckpoint(appName, executionMode, user);
+
+                checkBackpressure(appName, executionMode, user);
+            }
+        }
+    }
+
+    private void checkBackpressure(String appName, Integer executionMode, User user) {
+        Boolean backpressure = getBackpressure(appName, executionMode);
+        if (backpressure) {
+            processBackpressure(appName, executionMode, user);
+        }
+    }
+
+    private void processBackpressure(String appName, Integer executionMode, User user) {
+        String msg = String.format("%s 任务 在 %s上 反压 ", appName, executionMode == 6 ? "K8S"
+            : (executionMode == 4 ? "Yarn Application" : "unknown cluster"));
+        log.warn(msg);
+        // 根据预警级别发送预警
+        alarmByLevel(msg, ALARM_WARN_LEVEL, user.getMobile());
+    }
+
+    @SneakyThrows
+    private Boolean getBackpressure(String appName, Integer executionMode) {
+        String baseUrl = getBaseUrl(appName, executionMode);
+        String appId = getAppId(appName, executionMode);
+        String jobId = getJobId(appName, appId, executionMode);
+
+        String url = baseUrl + appId + "/jobs/" + jobId;
+
+        String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
+        JobsJobId jobsJobId = JacksonUtils.read(result, JobsJobId.class);
+        Vertice vertice = jobsJobId.getVertices().get(0);
+        String verticeId = vertice.getId();
+
+        url = url + "/vertices/" + verticeId + "/backpressure";
+        result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
+        Backpressure backpressure = JacksonUtils.read(result, Backpressure.class);
+        boolean isBackpressure = false;
+        for (Subtask subtask : backpressure.getSubtasks()) {
+            if (VertexBackPressureLevel.HIGH.toString().equals(subtask.getBackpressureLevel())) {
+                isBackpressure = true;
+                break;
+            }
+        }
+        return isBackpressure;
+    }
+
+    private void checkCheckpoint(String appName, Integer executionMode, User user) {
+        CheckPoints checkPoints = getCheckPoints(appName, executionMode);
+        processCheckpoint(appName, checkPoints, user);
+    }
+
+    private void processCheckpoint(String appName, CheckPoints checkPoints, User user) {
+        List<CheckPoint> history = checkPoints.getHistory();
+
+        // 处理失败情况
+        if (!"COMPLETED".equals(history.get(0).getStatus())) {
+            String msg = String.format("%s 任务 checkpoint失败： %s", appName, history.get(0));
+            log.warn(msg);
+            // 根据预警级别发送预警
+            alarmByLevel(msg, ALARM_WARN_LEVEL, user.getMobile());
+        } else {
+            log.info(String.format("%s 任务 checkpoint 正常", appName));
+        }
+
+        if (!"COMPLETED".equals(history.get(0).getStatus())
+            && !"COMPLETED".equals(history.get(1).getStatus())
+            && !"COMPLETED".equals(history.get(2).getStatus())) {
+            // 最新3次，都失败
+
+            String msg = String.format("%s 任务 连续3次checkpoint失败", appName);
+            log.error(msg);
+            // 根据预警级别发送预警
+            alarmByLevel(msg, ALARM_ERROR_LEVEL, user.getMobile());
+        }
+
+        // 处理大状态情况
+        long stateSizeMb = history.get(0).getStateSize() / 1024 / 1024;
+        Integer checkpointStateSizeMb = settingService.getCheckpointStateSizeMb();
+        if (stateSizeMb >= checkpointStateSizeMb) {
+            String msg = String.format("%s 任务 checkpoint状态超过%s MB，当前状态大小为%s MB", appName,
+                checkpointStateSizeMb, stateSizeMb);
+            // 根据预警级别发送预警
+            alarmByLevel(msg, ALARM_WARN_LEVEL, user.getMobile());
+        } else {
+            log.info(String.format("%s 任务 checkpoint状态大小为 %s MB", appName, stateSizeMb));
+        }
+
+
+    }
+
+    private String getAppId(String appName, Integer executionMode) {
+        if (ExecutionMode.isYarnMode(executionMode)) {
+            return YarnUtils.getAppId(appName).get(0).toString();
+        } else if (ExecutionMode.isKubernetesMode(executionMode)) {
+            return "";
+        }
+        return "";
+    }
+
+    @SneakyThrows
+    private CheckPoints getCheckPoints(String appName, Integer executionMode) {
+        String baseUrl = getBaseUrl(appName, executionMode);
+        String appId = getAppId(appName, executionMode);
+        String jobId = getJobId(appName, appId, executionMode);
+
+        String url = baseUrl + appId + "/jobs/" + jobId + "/checkpoints";
+
+        String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
+        CheckPoints checkPoints = JacksonUtils.read(result, CheckPoints.class);
+        return checkPoints;
+
+    }
+
+    @SneakyThrows
+    private String getJobId(String appName, String appId, Integer executionMode) {
+        String baseUrl = getBaseUrl(appName, executionMode);
+        String url = baseUrl + appId + "/jobs/overview";
+
+        String json = HttpClientUtils
+            .httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
+
+        String jobId = JSON.parseObject(json).getJSONArray("jobs").getJSONObject(0)
+            .getString("jid");
+
+        return jobId;
+    }
+
+    private String getBaseUrl(String appName, Integer executionMode) {
+        if (ExecutionMode.isYarnMode(executionMode)) {
+            String rmWebAppURL = HadoopUtils.getRMWebAppURL(true);
+            return rmWebAppURL + "/proxy/";
+        } else if (ExecutionMode.isKubernetesMode(executionMode)) {
+            QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("job_name", appName);
+            queryWrapper.eq("execution_mode", 6);
+            queryWrapper.eq("state", FlinkAppState.RUNNING.getValue());
+            Application app = applicationService.getOne(queryWrapper);
+
+            String restUrl = KubernetesRetriever.retrieveFlinkRestUrl(toTrkId(app).toClusterKey()).get();
+            return restUrl;
+        }
+        return null;
     }
 
     /**
@@ -368,6 +545,29 @@ public class MonitorTask {
             log.error(e.getMessage(), e);
             return false;
         }
+    }
+
+    @Data
+    @AllArgsConstructor
+    class CheckpointStatus {
+        @JSONField(name = "@class")
+        private String className;
+        private Long id;
+        private String status;
+        private Boolean isSavepoint;
+        private Long triggerTimestamp;
+        private Long latestAckTimestamp;
+        private Long stateSize;
+        private Long endToEndDuration;
+        private Long alignmentBuffered;
+        private Long processedData;
+        private Long persistedData;
+        private Long numSubtasks;
+        private Long numAcknowledgedSubtasks;
+        private String checkpointType;
+        private Object tasks;
+        private String externalPath;
+        private Boolean discarded;
     }
 
 }

@@ -659,6 +659,7 @@ import SvgIcon from '@/components/SvgIcon'
 import storage from '@/utils/storage'
 import {DEFAULT_THEME} from '@/store/mutation-types'
 import {activeURL} from '@/api/flinkCluster'
+import {monitorURL} from '@/api/flinkCluster'
 
 const Base64 = require('js-base64').Base64
 configOptions.push(
@@ -1036,6 +1037,12 @@ export default {
     },
 
     handleMonitor() {
+
+      monitorURL({ id: this.app.id }).then((resp) =>{
+        const url = resp.data + '/#/job/' + this.app.jobId + '/overview'
+        window.open(url)
+      })
+
       const monitor_url = 'http://wx12-test-hadoop003:3000/d/wKbnD5Gnk/apache-flink-2021-dashboard-for-job-task-manager?orgId=1&var-Source=Prometheus&var-tm_id=All&var-jm_instance='+ this.app.jobName +'&var-job_name=All&var-task_name=All'
       window.open(monitor_url)
     },
