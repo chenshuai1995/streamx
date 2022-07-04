@@ -194,10 +194,17 @@ public class MonitorTask {
         result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
         Backpressure backpressure = JacksonUtils.read(result, Backpressure.class);
         boolean isBackpressure = false;
-        for (Subtask subtask : backpressure.getSubtasks()) {
-            if (VertexBackPressureLevel.HIGH.toString().equals(subtask.getBackpressureLevel())) {
-                isBackpressure = true;
-                break;
+        log.info("backpressure: " + backpressure);
+        if (backpressure != null
+            && backpressure.getSubtasks() != null
+            && backpressure.getSubtasks().size() > 0) {
+
+            for (Subtask subtask : backpressure.getSubtasks()) {
+                if (VertexBackPressureLevel.HIGH.toString()
+                    .equals(subtask.getBackpressureLevel())) {
+                    isBackpressure = true;
+                    break;
+                }
             }
         }
         return isBackpressure;
@@ -212,6 +219,13 @@ public class MonitorTask {
 
     private void processCheckpoint(String appName, CheckPoints checkPoints, User user) {
         List<CheckPoint> history = checkPoints.getHistory();
+
+        log.info(String.format("%s 任务当前checkpoint状态： %s", appName, history.get(0)));
+
+        // 如果当前状态是IN_PROGRESS，忽略本次
+        if ("IN_PROGRESS".equals(history.get(0).getStatus())) {
+            return;
+        }
 
         // 处理失败情况
         if (!"COMPLETED".equals(history.get(0).getStatus())) {
