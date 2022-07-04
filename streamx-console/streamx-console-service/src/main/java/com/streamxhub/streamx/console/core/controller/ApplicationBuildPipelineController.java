@@ -70,6 +70,13 @@ public class ApplicationBuildPipelineController {
     @RequiresPermissions("app:create")
     public RestResponse buildApplication(Long appId, boolean forceBuild) {
         try {
+            if (forceBuild) {
+                // 强制重新build
+                Application app = applicationService.getById(appId);
+                boolean actionResult = appBuildPipeService.buildApplication(app);
+                return RestResponse.create().data(actionResult);
+            }
+
             if (!forceBuild && !appBuildPipeService.allowToBuildNow(appId)) {
                 return RestResponse.create().data(false);
             }

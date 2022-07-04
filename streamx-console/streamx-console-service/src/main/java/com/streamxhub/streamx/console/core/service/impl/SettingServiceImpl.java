@@ -152,4 +152,16 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         return settings.get(SettingService.KEY_ALERT_WEBHOOK_URL).getValue();
     }
 
+    public Integer getCheckpointStateSizeMb() {
+        return Integer.parseInt(settings.get(SettingService.KEY_CHECKPOINT_STATE_SIZE_MB).getValue());
+    }
+
+    public String getGrafanaTestUrl() {
+        return settings.get(SettingService.KEY_GRAFANA_TEST_URL).getValue();
+    }
+
+    public String getGrafanaProdUrl() {
+        return settings.get(SettingService.KEY_GRAFANA_PROD_URL).getValue();
+    }
+
 }
