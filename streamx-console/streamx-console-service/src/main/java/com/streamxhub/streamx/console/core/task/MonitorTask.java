@@ -77,9 +77,6 @@ import org.springframework.stereotype.Component;
 public class MonitorTask {
 
     @Autowired
-    private K8sFlinkTrkMonitor k8sFlinkTrkMonitor;
-
-    @Autowired
     private ApplicationService applicationService;
 
     @Autowired
@@ -144,8 +141,8 @@ public class MonitorTask {
 
     }
 
-//    @Scheduled(cron = "${monitor.health.cron}")
-    @Scheduled(cron = "*/10 * * * * ?")
+    @Scheduled(cron = "${monitor.health.cron}")
+//    @Scheduled(cron = "*/10 * * * * ?")
     public void healthCheck() {
         List<MonitorDefine> onlines = monitorDefineService.getOnlines();
         if (onlines != null && onlines.size() > 0) {
@@ -179,6 +176,10 @@ public class MonitorTask {
     @SneakyThrows
     private Boolean getBackpressure(String appName, Integer executionMode) {
         String baseUrl = getBaseUrl(appName, executionMode);
+        if (StringUtils.isEmpty(baseUrl)) {
+            return false;
+        }
+
         String appId = getAppId(appName, executionMode);
         String jobId = getJobId(appName, appId, executionMode);
 
@@ -204,7 +205,9 @@ public class MonitorTask {
 
     private void checkCheckpoint(String appName, Integer executionMode, User user) {
         CheckPoints checkPoints = getCheckPoints(appName, executionMode);
-        processCheckpoint(appName, checkPoints, user);
+        if (checkPoints != null) {
+            processCheckpoint(appName, checkPoints, user);
+        }
     }
 
     private void processCheckpoint(String appName, CheckPoints checkPoints, User user) {
@@ -258,6 +261,9 @@ public class MonitorTask {
     @SneakyThrows
     private CheckPoints getCheckPoints(String appName, Integer executionMode) {
         String baseUrl = getBaseUrl(appName, executionMode);
+        if (StringUtils.isEmpty(baseUrl)) {
+            return null;
+        }
         String appId = getAppId(appName, executionMode);
         String jobId = getJobId(appName, appId, executionMode);
 
@@ -266,12 +272,14 @@ public class MonitorTask {
         String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
         CheckPoints checkPoints = JacksonUtils.read(result, CheckPoints.class);
         return checkPoints;
-
     }
 
     @SneakyThrows
     private String getJobId(String appName, String appId, Integer executionMode) {
         String baseUrl = getBaseUrl(appName, executionMode);
+        if (StringUtils.isEmpty(baseUrl)) {
+            return null;
+        }
         String url = baseUrl + appId + "/jobs/overview";
 
         String json = HttpClientUtils
@@ -294,7 +302,12 @@ public class MonitorTask {
             queryWrapper.eq("state", FlinkAppState.RUNNING.getValue());
             Application app = applicationService.getOne(queryWrapper);
 
-            String restUrl = KubernetesRetriever.retrieveFlinkRestUrl(toTrkId(app).toClusterKey()).get();
+            if (app == null) {
+                return null;
+            }
+
+            String restUrl = KubernetesRetriever
+                .retrieveFlinkRestUrl(toTrkId(app).toClusterKey()).get();
             return restUrl;
         }
         return null;
@@ -538,9 +551,7 @@ public class MonitorTask {
 
             TrkId trkId = toTrkId(application);
 
-            return k8sFlinkTrkMonitor.checkIsInRemoteCluster(trkId);
-        } catch (IllegalArgumentException e1) {
-            return false;
+            return KubernetesRetriever.isDeploymentExists(trkId.clusterId(), trkId.namespace());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return false;

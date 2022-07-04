@@ -70,26 +70,14 @@ public class FlinkClusterController {
 
     @PostMapping("monitorUrl")
     public RestResponse monitorUrl(Long id) throws MalformedURLException {
-        Application application = applicationService.getById(id);
-
-        // TODO 判断当前环境 测试，生产
+        String url = "";
         String uriString = ServletUriComponentsBuilder.fromCurrentRequestUri().toUriString();
         if (uriString.contains("streamx")) {
-
+            url = settingService.getGrafanaProdUrl();
         } else {
-
+            url = settingService.getGrafanaTestUrl();
         }
-
-
-        if (ExecutionMode.isKubernetesMode(application.getExecutionMode())) {
-
-        } else if (ExecutionMode.isYarnMode(application.getExecutionMode())) {
-
-        }
-
-
-        FlinkCluster cluster = flinkClusterService.getById(id);
-        return RestResponse.create().data(cluster.getActiveAddress().toURL());
+        return RestResponse.create().data(url);
     }
 
     @PostMapping("check")

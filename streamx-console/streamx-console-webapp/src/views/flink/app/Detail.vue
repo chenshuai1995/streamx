@@ -1039,12 +1039,10 @@ export default {
     handleMonitor() {
 
       monitorURL({ id: this.app.id }).then((resp) =>{
-        const url = resp.data + '/#/job/' + this.app.jobId + '/overview'
+        this.app.jobName
+        const url = resp.data + '&var-tm_id=All&var-jm_instance='+ this.app.jobName +'&var-job_name=All&var-task_name=All'
         window.open(url)
       })
-
-      const monitor_url = 'http://wx12-test-hadoop003:3000/d/wKbnD5Gnk/apache-flink-2021-dashboard-for-job-task-manager?orgId=1&var-Source=Prometheus&var-tm_id=All&var-jm_instance='+ this.app.jobName +'&var-job_name=All&var-task_name=All'
-      window.open(monitor_url)
     },
 
     handleView() {
