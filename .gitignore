@@ -15,7 +15,7 @@ target/
 .DS_Store
 ### Eclipse template
 .metadata
-bin/
+#bin/
 tmp/
 *.tmp
 *.bak
