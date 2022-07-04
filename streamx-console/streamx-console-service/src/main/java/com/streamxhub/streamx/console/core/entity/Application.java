@@ -242,6 +242,7 @@ public class Application implements Serializable {
     /**
      * 1: cicd (build from csv)
      * 2: upload (upload local jar job)
+     * 3: cloud (build from cloud)
      */
     private Integer resourceFrom;
 
@@ -575,6 +576,11 @@ public class Application implements Serializable {
     @JsonIgnore
     public boolean isUploadJob() {
         return isCustomCodeJob() && ResourceFrom.UPLOAD.getValue().equals(this.getResourceFrom());
+    }
+
+    @JsonIgnore
+    public boolean isCloudJob() {
+        return isCustomCodeJob() && ResourceFrom.CLOUD.getValue().equals(this.getResourceFrom());
     }
 
     @JsonIgnore

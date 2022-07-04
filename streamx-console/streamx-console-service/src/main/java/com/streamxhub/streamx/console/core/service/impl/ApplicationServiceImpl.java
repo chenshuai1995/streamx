@@ -552,6 +552,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             appParam.setJarCheckSum(FileUtils.checksumCRC32(new File(jarPath)));
         }
 
+        if (appParam.isCloudJob()) {
+            String jarPath = appParam.getJar();
+            appParam.setJarCheckSum(FileUtils.checksumCRC32(new File(jarPath)));
+        }
+
         boolean saved = save(appParam);
         if (saved) {
             if (appParam.isFlinkSqlJob()) {

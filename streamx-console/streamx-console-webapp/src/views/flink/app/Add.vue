@@ -376,6 +376,10 @@
               <svg-icon role="img" name="upload"/>
               Upload <span class="gray">(upload local job)</span>
             </a-select-option>
+            <a-select-option value="cloud">
+              <svg-icon role="img" name="upload"/>
+              研发中台 <span class="gray">(build from cloud)</span>
+            </a-select-option>
           </a-select>
         </a-form-item>
 
@@ -423,6 +427,31 @@
               </template>
             </a-alert>
 
+          </a-form-item>
+
+          <a-form-item
+            label="Program Main"
+            :label-col="{lg: {span: 5}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+            <a-input
+              type="text"
+              allowClear
+              placeholder="Please enter Main class"
+              v-decorator="[ 'mainClass', {rules: [{ required: true, message: 'Program Main is required' }]} ]">
+            </a-input>
+          </a-form-item>
+        </template>
+        <template v-else-if="resourceFrom === 'cloud'">
+          <a-form-item
+            label="remote local jar"
+            :label-col="{lg: {span: 5}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+            <a-input
+              type="text"
+              allowClear
+              placeholder="Please enter remote local jar path"
+              v-decorator="[ 'remoteJar', {rules: [{ required: true, message: 'remote local jar is required' }]} ]">
+            </a-input>
           </a-form-item>
 
           <a-form-item
@@ -2338,6 +2367,7 @@ export default {
 
       // common params...
       const resourceFrom = values.resourceFrom
+      console.log(values.resourceFrom)
       if (resourceFrom != null) {
         if (resourceFrom === 'cvs') {
           params['resourceFrom'] = 1
@@ -2364,6 +2394,13 @@ export default {
             params['mainClass'] = this.form.getFieldValue('mainClass') || null
             this.handleCreateApp(params)
           }
+        } else if (resourceFrom === 'cloud') {
+          // from cloud
+          params['resourceFrom'] = 3
+          params['appType'] = 2
+          params['jar'] = this.form.getFieldValue('remoteJar')
+          params['mainClass'] = this.form.getFieldValue('mainClass') || null
+          this.handleCreateApp(params)
         } else {
           // from upload
           params['resourceFrom'] = 2

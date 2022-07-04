@@ -36,7 +36,12 @@ public enum ResourceFrom implements Serializable {
     /**
      * upload local jar
      */
-    UPLOAD(2);
+    UPLOAD(2),
+
+    /**
+     * cloud(build from cloud)
+     */
+    CLOUD(3);
 
     private final Integer value;
 
