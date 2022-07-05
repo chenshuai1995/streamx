@@ -421,6 +421,9 @@ public class ApplBuildPipeServiceImpl
                     case STREAMX_FLINK:
                         return String.format("%s/%s", app.getAppLib(), app.getModule().concat(".jar"));
                     case APACHE_FLINK:
+                        if (app.isCloudJob()) {
+                            return app.getJar();
+                        }
                         return String.format("%s/%s", app.getAppHome(), app.getJar());
                     default:
                         throw new IllegalArgumentException("[StreamX] unsupported ApplicationType of custom code: "
