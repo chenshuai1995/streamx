@@ -205,6 +205,23 @@ public class ApplBuildPipeServiceImpl
                                 throw new IllegalArgumentException("[StreamX] unsupported ApplicationType of custom code: "
                                         + app.getApplicationType());
                         }
+                    } else if (app.isCloudJob()) {
+                        String uploadJar = app.getJar();
+                        log.info("研发中台jar: " + uploadJar);
+                        log.info(app.getApplicationType().toString());
+                        switch (app.getApplicationType()) {
+                            case STREAMX_FLINK:
+                                fsOperator.mkdirs(app.getAppLib());
+                                fsOperator.copy(uploadJar, app.getAppLib(), false, true);
+                                break;
+                            case APACHE_FLINK:
+                                fsOperator.mkdirs(appHome);
+                                fsOperator.copy(uploadJar, appHome, false, true);
+                                break;
+                            default:
+                                throw new IllegalArgumentException("[StreamX] unsupported ApplicationType of custom code: "
+                                    + app.getApplicationType());
+                        }
                     } else {
                         fsOperator.upload(app.getDistHome(), appHome);
                     }
