@@ -7,7 +7,6 @@ import lombok.Data;
 
 /**
  * @author Jim Chen
- * @date 2022-07-01
  */
 @Data
 public class Backpressure implements Serializable {

@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
+import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.YarnUtils;
@@ -20,6 +21,7 @@ import com.streamxhub.streamx.console.core.metrics.flink.Backpressure;
 import com.streamxhub.streamx.console.core.metrics.flink.Backpressure.Subtask;
 import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
 import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints.CheckPoint;
+import com.streamxhub.streamx.console.core.metrics.flink.Exceptions;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsJobId;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsJobId.Vertice;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
@@ -33,16 +35,18 @@ import com.streamxhub.streamx.console.core.utils.MessageManager;
 import com.streamxhub.streamx.console.core.utils.PlatformMessage;
 import com.streamxhub.streamx.console.system.entity.User;
 import com.streamxhub.streamx.console.system.service.UserService;
-import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.KubernetesRetriever;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
@@ -100,6 +104,8 @@ public class MonitorTask {
     private Integer ALARM_WARN_LEVEL = 2;
     private Integer ALARM_ERROR_LEVEL = 3;
 
+    private Map<String, Map<String, Boolean>> exceptionCache = new HashMap<>();
+
     @Scheduled(cron = "${monitor.job.cron}")
     public void jobStatus() {
         List<MonitorDefine> onlines = monitorDefineService.getOnlines();
@@ -154,8 +160,70 @@ public class MonitorTask {
                 checkCheckpoint(appName, executionMode, user);
 
                 checkBackpressure(appName, executionMode, user);
+
+                checkException(appName, executionMode, user);
             }
         }
+    }
+
+    private void checkException(String appName, Integer executionMode, User user) {
+        Exceptions execeptions = getExeceptions(appName, executionMode);
+        if (execeptions != null) {
+            processExceptions(appName, execeptions, user);
+        }
+    }
+
+    private void processExceptions(String appName, Exceptions execeptions, User user) {
+        Boolean isException = false;
+
+        String rootException = execeptions.getRootException();
+        Long timestamp = execeptions.getTimestamp();
+        String exceptionMapKey = timestamp + rootException;
+
+        if (exceptionCache.get(appName) == null) {
+            isException = true;
+            Map<String, Boolean> exceptionMap = new HashMap<>();
+            exceptionMap.put(exceptionMapKey, isException);
+            exceptionCache.put(appName, exceptionMap);
+        } else {
+            Boolean isSendException = exceptionCache.get(appName).get(exceptionMapKey);
+            if (!isSendException) {
+                isException = true;
+                Map<String, Boolean> exceptionMap = new HashMap<>();
+                exceptionMap.put(exceptionMapKey, isException);
+                exceptionCache.put(appName, exceptionMap);
+            }
+        }
+
+        if (isException) {
+            LocalDateTime ofInstant = LocalDateTime
+                .ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.of("Asia/Shanghai"));
+
+            String time = DateUtils.formatFullTime(ofInstant);
+
+            String msg = String.format("%s %s 任务 异常: %s ", time, appName, rootException);
+            log.error(msg);
+            // 根据预警级别发送预警
+            alarmByLevel(msg, ALARM_ERROR_LEVEL, user.getMobile());
+        }
+    }
+
+    @SneakyThrows
+    private Exceptions getExeceptions(String appName, Integer executionMode) {
+
+        String baseUrl = getBaseUrl(appName, executionMode);
+        if (StringUtils.isEmpty(baseUrl)) {
+            return null;
+        }
+        String appId = getAppId(appName, executionMode);
+        String jobId = getJobId(appName, appId, executionMode);
+
+        String url = baseUrl + appId + "/jobs/" + jobId + "/exceptions";
+
+        String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
+        Exceptions exceptions = JacksonUtils.read(result, Exceptions.class);
+        return exceptions;
+
     }
 
     private void checkBackpressure(String appName, Integer executionMode, User user) {
