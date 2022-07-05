@@ -186,12 +186,19 @@ public class MonitorTask {
             exceptionMap.put(exceptionMapKey, isException);
             exceptionCache.put(appName, exceptionMap);
         } else {
-            Boolean isSendException = exceptionCache.get(appName).get(exceptionMapKey);
-            if (!isSendException) {
-                isException = true;
-                Map<String, Boolean> exceptionMap = new HashMap<>();
-                exceptionMap.put(exceptionMapKey, isException);
-                exceptionCache.put(appName, exceptionMap);
+            Map<String, Boolean> exceptionMap = exceptionCache.get(appName);
+            if (exceptionMap == null) {
+                log.error("exceptionMap 为空" + exceptionCache.toString() + "###" + appName);
+            } else {
+                Boolean isSendException = exceptionMap.get(exceptionMapKey);
+                log.warn("isSendException" + isSendException);
+                if (isSendException == null) {isSendException = false;}
+                if (!isSendException) {
+                    isException = true;
+                    exceptionMap = new HashMap<>();
+                    exceptionMap.put(exceptionMapKey, isException);
+                    exceptionCache.put(appName, exceptionMap);
+                }
             }
         }
 
