@@ -230,6 +230,7 @@ public class ApplBuildPipeServiceImpl
                         //copy jar to local upload dir
                         for (String jar : app.getDependencyObject().getJar()) {
                             File localJar = new File(WebUtils.getAppTempDir(), jar);
+                            log.info("依赖jar： " + localJar);
                             assert localJar.exists();
                             String localUploads = Workspace.local().APP_UPLOADS();
                             String uploadJar = localUploads.concat("/").concat(jar);

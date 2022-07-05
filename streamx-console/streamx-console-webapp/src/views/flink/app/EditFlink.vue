@@ -71,6 +71,9 @@
           <template slot="message" v-if="this.resourceFrom === 2">
             <svg-icon name="upload" style="color: #108ee9"/>&nbsp;&nbsp;Upload (upload local job)
           </template>
+          <template slot="message" v-if="this.resourceFrom === 3">
+            <svg-icon name="cloud" style="color: #108ee9"/>&nbsp;&nbsp;CLOUD (build from cloud)
+          </template>
         </a-alert>
       </a-form-item>
 
