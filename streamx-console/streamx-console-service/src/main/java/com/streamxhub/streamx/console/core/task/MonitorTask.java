@@ -187,18 +187,13 @@ public class MonitorTask {
             exceptionCache.put(appName, exceptionMap);
         } else {
             Map<String, Boolean> exceptionMap = exceptionCache.get(appName);
-            if (exceptionMap == null) {
-                log.error("exceptionMap 为空" + exceptionCache.toString() + "###" + appName);
-            } else {
-                Boolean isSendException = exceptionMap.get(exceptionMapKey);
-                log.warn("isSendException" + isSendException);
-                if (isSendException == null) {isSendException = false;}
-                if (!isSendException) {
-                    isException = true;
-                    exceptionMap = new HashMap<>();
-                    exceptionMap.put(exceptionMapKey, isException);
-                    exceptionCache.put(appName, exceptionMap);
-                }
+            Boolean isSendException = exceptionMap.get(exceptionMapKey);
+            if (isSendException == null) {isSendException = false;}
+            if (!isSendException) {
+                isException = true;
+                exceptionMap = new HashMap<>();
+                exceptionMap.put(exceptionMapKey, isException);
+                exceptionCache.put(appName, exceptionMap);
             }
         }
 
@@ -241,7 +236,9 @@ public class MonitorTask {
     }
 
     private void processBackpressure(String appName, Integer executionMode, User user) {
-        String msg = String.format("%s 任务 在 %s上 反压 ", appName, executionMode == 6 ? "K8S"
+        String date = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            .format(LocalDateTime.now());
+        String msg = String.format("%s %s 任务 在 %s上 反压 ", date, appName, executionMode == 6 ? "K8S"
             : (executionMode == 4 ? "Yarn Application" : "unknown cluster"));
         log.warn(msg);
         // 根据预警级别发送预警
@@ -269,7 +266,7 @@ public class MonitorTask {
         result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
         Backpressure backpressure = JacksonUtils.read(result, Backpressure.class);
         boolean isBackpressure = false;
-        log.info("backpressure: " + backpressure);
+        log.info(appName + "任务 backpressure: " + backpressure);
         if (backpressure != null
             && backpressure.getSubtasks() != null
             && backpressure.getSubtasks().size() > 0) {
@@ -295,6 +292,9 @@ public class MonitorTask {
     private void processCheckpoint(String appName, CheckPoints checkPoints, User user) {
         List<CheckPoint> history = checkPoints.getHistory();
 
+        String date = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            .format(LocalDateTime.now());
+
         log.info(String.format("%s 任务当前checkpoint状态： %s", appName, history.get(0)));
 
         // 如果当前状态是IN_PROGRESS，忽略本次
@@ -304,7 +304,7 @@ public class MonitorTask {
 
         // 处理失败情况
         if (!"COMPLETED".equals(history.get(0).getStatus())) {
-            String msg = String.format("%s 任务 checkpoint失败： %s", appName, history.get(0));
+            String msg = String.format("%s %s 任务 checkpoint失败： %s", date, appName, history.get(0));
             log.warn(msg);
             // 根据预警级别发送预警
             alarmByLevel(msg, ALARM_WARN_LEVEL, user.getMobile());
@@ -317,7 +317,7 @@ public class MonitorTask {
             && !"COMPLETED".equals(history.get(2).getStatus())) {
             // 最新3次，都失败
 
-            String msg = String.format("%s 任务 连续3次checkpoint失败", appName);
+            String msg = String.format("%s %s 任务 连续3次checkpoint失败", date, appName);
             log.error(msg);
             // 根据预警级别发送预警
             alarmByLevel(msg, ALARM_ERROR_LEVEL, user.getMobile());
@@ -327,7 +327,7 @@ public class MonitorTask {
         long stateSizeMb = history.get(0).getStateSize() / 1024 / 1024;
         Integer checkpointStateSizeMb = settingService.getCheckpointStateSizeMb();
         if (stateSizeMb >= checkpointStateSizeMb) {
-            String msg = String.format("%s 任务 checkpoint状态超过%s MB，当前状态大小为%s MB", appName,
+            String msg = String.format("%s %s 任务 checkpoint状态超过%s MB，当前状态大小为%s MB", date, appName,
                 checkpointStateSizeMb, stateSizeMb);
             // 根据预警级别发送预警
             alarmByLevel(msg, ALARM_WARN_LEVEL, user.getMobile());
