@@ -86,6 +86,21 @@ public class MonitorDefine implements Serializable {
     private Integer expectInstance;
 
     /**
+     * 是否检查cp，默认是1，检查
+     */
+    private Integer checkCheckpoint;
+
+    /**
+     * 是否检查反压，默认是1，检查
+     */
+    private Integer checkBackpressure;
+
+    /**
+     * 是否检查异常，默认是1，检查
+     */
+    private Integer checkException;
+
+    /**
      * 是否上线：'0：下线，1上线'
      */
     @TableField(value = "`release`")
@@ -136,4 +151,15 @@ public class MonitorDefine implements Serializable {
      */
     private Date updateTime;
 
+    public boolean isCheckCheckpoint() {
+        return this.checkCheckpoint == 1;
+    }
+
+    public boolean isCheckBackpressure() {
+        return this.checkBackpressure == 1;
+    }
+
+    public boolean isCheckException() {
+        return this.checkException == 1;
+    }
 }

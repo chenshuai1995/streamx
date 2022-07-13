@@ -157,11 +157,17 @@ public class MonitorTask {
                 Integer executionMode = define.getExecutionMode();
                 User user = userService.findByName(define.getMaintainName());
 
-                checkCheckpoint(appName, executionMode, user);
+                if (define.isCheckCheckpoint()) {
+                    checkCheckpoint(appName, executionMode, user);
+                }
 
-                checkBackpressure(appName, executionMode, user);
+                if (define.isCheckBackpressure()) {
+                    checkBackpressure(appName, executionMode, user);
+                }
 
-                checkException(appName, executionMode, user);
+                if (define.isCheckException()) {
+                    checkException(appName, executionMode, user);
+                }
             }
         }
     }
