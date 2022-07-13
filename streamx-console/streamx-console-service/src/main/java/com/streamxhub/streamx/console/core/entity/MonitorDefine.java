@@ -151,15 +151,15 @@ public class MonitorDefine implements Serializable {
      */
     private Date updateTime;
 
-    public boolean isCheckCheckpoint() {
+    public boolean checkCheckpoint() {
         return this.checkCheckpoint == 1;
     }
 
-    public boolean isCheckBackpressure() {
+    public boolean checkBackpressure() {
         return this.checkBackpressure == 1;
     }
 
-    public boolean isCheckException() {
+    public boolean checkException() {
         return this.checkException == 1;
     }
 }
