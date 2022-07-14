@@ -177,7 +177,7 @@ public class MonitorTask {
         if (execeptions != null && StringUtils.isNotBlank(execeptions.getRootException())) {
             processExceptions(appName, execeptions, user);
         } else {
-            String msg = String.format("%s %s 任务 无异常", appName);
+            String msg = String.format("%s 任务 无异常", appName);
             log.info(msg);
         }
     }
@@ -590,9 +590,10 @@ public class MonitorTask {
             ConsumerRecord consumerRecord = null;
             long delay = -1;
             Boolean isWarn = false;
+            long maxDelay = -1;
             for (ConsumerRecord<String, String> record : records) {
                 delay = (System.currentTimeMillis() - record.timestamp()) / 1000;
-                log.info("延迟 ：" + String.valueOf(delay) + "秒");
+                maxDelay = Math.max(delay, maxDelay);
                 if (delay > delaySecond) {
                     String kafkaTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(
                         LocalDateTime.ofInstant(Instant.ofEpochMilli(record.timestamp()),
@@ -607,6 +608,7 @@ public class MonitorTask {
                     break;
                 }
             }
+            log.info("当前最大延迟 ：" + String.valueOf(maxDelay) + "秒");
             return msg;
 
         } catch (Exception e) {
