@@ -174,8 +174,11 @@ public class MonitorTask {
 
     private void checkException(String appName, Integer executionMode, User user) {
         Exceptions execeptions = getExeceptions(appName, executionMode);
-        if (execeptions != null) {
+        if (execeptions != null && StringUtils.isNotBlank(execeptions.getRootException())) {
             processExceptions(appName, execeptions, user);
+        } else {
+            String msg = String.format("%s %s 任务 无异常", appName);
+            log.info(msg);
         }
     }
 
@@ -305,7 +308,7 @@ public class MonitorTask {
         }
     }
 
-    private void processCheckpoint(String appName, CheckPoints checkPoints, User user) {
+    private boolean processCheckpoint(String appName, CheckPoints checkPoints, User user) {
         List<CheckPoint> history = checkPoints.getHistory();
 
         String date = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -313,14 +316,14 @@ public class MonitorTask {
 
         if (history == null || history.size() == 0 || history.get(0) == null) {
             log.warn(String.format("%s 任务当前checkpoint状态为空： %s", appName, checkPoints));
-            return;
+            return false;
         }
 
         log.info(String.format("%s 任务当前checkpoint状态： %s", appName, history.get(0)));
 
         // 如果当前状态是IN_PROGRESS，忽略本次
         if ("IN_PROGRESS".equals(history.get(0).getStatus())) {
-            return;
+            return false;
         }
 
         // 处理失败情况
@@ -356,7 +359,7 @@ public class MonitorTask {
             log.info(String.format("%s 任务 checkpoint状态大小为 %s MB", appName, stateSizeMb));
         }
 
-
+        return true;
     }
 
     private String getAppId(String appName, Integer executionMode) {
