@@ -204,15 +204,22 @@ public class MonitorTask {
         }
 
         if (isException) {
-            LocalDateTime ofInstant = LocalDateTime
-                .ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.of("Asia/Shanghai"));
+            try {
+                LocalDateTime ofInstant = LocalDateTime
+                    .ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.of("Asia/Shanghai"));
 
-            String time = DateUtils.formatFullTime(ofInstant);
+                String time = DateUtils.formatFullTime(ofInstant);
 
-            String msg = String.format("%s %s 任务 异常: %s ", time, appName, rootException);
-            log.error(msg);
-            // 根据预警级别发送预警
-            alarmByLevel(msg, ALARM_ERROR_LEVEL, user.getMobile());
+                String msg = String.format("%s %s 任务 异常: %s ", time, appName, rootException);
+                log.error(msg);
+                // 根据预警级别发送预警
+                alarmByLevel(msg, ALARM_ERROR_LEVEL, user.getMobile());
+            } catch (Exception e) {
+                e.printStackTrace();
+                String errMsg = String.format("预警失败： timestamp: %s, appName: %s, execeptions: %s ", timestamp,
+                        appName, execeptions);
+                log.error(errMsg);
+            }
         }
     }
 
@@ -228,6 +235,7 @@ public class MonitorTask {
 
         String url = baseUrl + appId + "/jobs/" + jobId + "/exceptions";
 
+        log.info("url : " + url);
         String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
         Exceptions exceptions = JacksonUtils.read(result, Exceptions.class);
         return exceptions;
@@ -263,12 +271,14 @@ public class MonitorTask {
 
         String url = baseUrl + appId + "/jobs/" + jobId;
 
+        log.info("url : " + url);
         String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
         JobsJobId jobsJobId = JacksonUtils.read(result, JobsJobId.class);
         Vertice vertice = jobsJobId.getVertices().get(0);
         String verticeId = vertice.getId();
 
         url = url + "/vertices/" + verticeId + "/backpressure";
+        log.info("url : " + url);
         result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
         Backpressure backpressure = JacksonUtils.read(result, Backpressure.class);
         boolean isBackpressure = false;
@@ -300,6 +310,11 @@ public class MonitorTask {
 
         String date = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
             .format(LocalDateTime.now());
+
+        if (history == null || history.size() == 0 || history.get(0) == null) {
+            log.warn(String.format("%s 任务当前checkpoint状态为空： %s", appName, checkPoints));
+            return;
+        }
 
         log.info(String.format("%s 任务当前checkpoint状态： %s", appName, history.get(0)));
 
@@ -364,6 +379,7 @@ public class MonitorTask {
 
         String url = baseUrl + appId + "/jobs/" + jobId + "/checkpoints";
 
+        log.info("url : " + url);
         String result = HttpClientUtils.httpGetRequest(url, RequestConfig.custom().setConnectTimeout(5000).build());
         CheckPoints checkPoints = JacksonUtils.read(result, CheckPoints.class);
         return checkPoints;
