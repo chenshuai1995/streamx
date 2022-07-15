@@ -613,6 +613,10 @@ public class MonitorTask {
 
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            if (adminClient != null) {
+                adminClient.close();
+            }
         }
         return msg;
     }
