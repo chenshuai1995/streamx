@@ -175,7 +175,12 @@ public class MonitorTask {
     private void checkException(String appName, Integer executionMode, User user) {
         Exceptions execeptions = getExeceptions(appName, executionMode);
         if (execeptions != null && StringUtils.isNotBlank(execeptions.getRootException())) {
-            processExceptions(appName, execeptions, user);
+            LocalDateTime ofInstant = LocalDateTime
+                .ofInstant(Instant.ofEpochMilli(execeptions.getTimestamp()), ZoneId.of("Asia/Shanghai"));
+            if (LocalDateTime.now().toLocalDate().equals(ofInstant.toLocalDate())) {
+                // 如果异常是当天的，处理。之前的不处理
+                processExceptions(appName, execeptions, user);
+            }
         } else {
             String msg = String.format("%s 任务 无异常", appName);
             log.info(msg);
@@ -608,6 +613,7 @@ public class MonitorTask {
                     break;
                 }
             }
+            consumer.close();
             log.info("当前最大延迟 ：" + String.valueOf(maxDelay) + "秒");
             return msg;
 

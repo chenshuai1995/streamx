@@ -22,6 +22,9 @@
             <if test="monitorDefine.expectInstance != null and monitorDefine.expectInstance != ''">
                 AND t.expect_instance = #{monitorDefine.expectInstance}
             </if>
+            <if test="monitorDefine.release == 0">
+                AND t.`release` = #{monitorDefine.release}
+            </if>
             <if test="monitorDefine.release != null and monitorDefine.release != ''">
                 AND t.`release` = #{monitorDefine.release}
             </if>
