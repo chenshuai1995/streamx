@@ -156,9 +156,10 @@ public class MonitorTask {
                 String appName = define.getAppName();
                 Integer executionMode = define.getExecutionMode();
                 User user = userService.findByName(define.getMaintainName());
+                Integer maxCheckpointStateSizeMb = define.getMaxCheckpointStateSizeMb();
 
                 if (define.checkCheckpoint()) {
-                    checkCheckpoint(appName, executionMode, user);
+                    checkCheckpoint(appName, executionMode, user, maxCheckpointStateSizeMb);
                 }
 
                 if (define.checkBackpressure()) {
@@ -306,14 +307,14 @@ public class MonitorTask {
         return isBackpressure;
     }
 
-    private void checkCheckpoint(String appName, Integer executionMode, User user) {
+    private void checkCheckpoint(String appName, Integer executionMode, User user, Integer maxCheckpointStateSizeMb) {
         CheckPoints checkPoints = getCheckPoints(appName, executionMode);
         if (checkPoints != null) {
-            processCheckpoint(appName, checkPoints, user);
+            processCheckpoint(appName, checkPoints, user, maxCheckpointStateSizeMb);
         }
     }
 
-    private boolean processCheckpoint(String appName, CheckPoints checkPoints, User user) {
+    private boolean processCheckpoint(String appName, CheckPoints checkPoints, User user, Integer maxCheckpointStateSizeMb) {
         List<CheckPoint> history = checkPoints.getHistory();
 
         String date = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -353,15 +354,26 @@ public class MonitorTask {
         }
 
         // 处理大状态情况
+        boolean needProcess = true;
         long stateSizeMb = history.get(0).getStateSize() / 1024 / 1024;
-        Integer checkpointStateSizeMb = settingService.getCheckpointStateSizeMb();
-        if (stateSizeMb >= checkpointStateSizeMb) {
-            String msg = String.format("%s %s 任务 checkpoint状态超过%s MB，当前状态大小为%s MB", date, appName,
-                checkpointStateSizeMb, stateSizeMb);
-            // 根据预警级别发送预警
-            alarmByLevel(msg, ALARM_WARN_LEVEL, user.getMobile());
+        //优先级： app > 全局
+        Integer checkpointStateSizeMb = null;
+        if (maxCheckpointStateSizeMb == null) {
+            checkpointStateSizeMb = settingService.getCheckpointStateSizeMb();
+        } else if (maxCheckpointStateSizeMb == 0) {
+            needProcess = false;// 不监控大状态
         } else {
-            log.info(String.format("%s 任务 checkpoint状态大小为 %s MB", appName, stateSizeMb));
+            checkpointStateSizeMb = maxCheckpointStateSizeMb;
+        }
+        if (needProcess) {
+            if (stateSizeMb >= checkpointStateSizeMb) {
+                String msg = String.format("%s %s 任务 checkpoint状态超过%s MB，当前状态大小为%s MB", date, appName,
+                    checkpointStateSizeMb, stateSizeMb);
+                // 根据预警级别发送预警
+                alarmByLevel(msg, ALARM_WARN_LEVEL, user.getMobile());
+            } else {
+                log.info(String.format("%s 任务 checkpoint状态大小为 %s MB", appName, stateSizeMb));
+            }
         }
 
         return true;

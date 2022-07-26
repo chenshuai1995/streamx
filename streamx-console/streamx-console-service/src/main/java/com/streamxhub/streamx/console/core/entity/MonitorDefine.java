@@ -101,6 +101,11 @@ public class MonitorDefine implements Serializable {
     private Integer checkException;
 
     /**
+     * checkpoint max state
+     */
+    private Integer maxCheckpointStateSizeMb;
+
+    /**
      * 是否上线：'0：下线，1上线'
      */
     @TableField(value = "`release`")
