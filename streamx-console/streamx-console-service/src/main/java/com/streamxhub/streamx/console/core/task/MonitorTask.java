@@ -101,6 +101,7 @@ public class MonitorTask {
     @Autowired
     private SettingService settingService;
 
+    private Integer ALARM_INFO_LEVEL = 1;
     private Integer ALARM_WARN_LEVEL = 2;
     private Integer ALARM_ERROR_LEVEL = 3;
 
@@ -265,7 +266,7 @@ public class MonitorTask {
             : (executionMode == 4 ? "Yarn Application" : "unknown cluster"));
         log.warn(msg);
         // 根据预警级别发送预警
-        alarmByLevel(msg, ALARM_WARN_LEVEL, user.getMobile());
+        alarmByLevel(msg, ALARM_INFO_LEVEL, user.getMobile());
     }
 
     @SneakyThrows
@@ -337,7 +338,7 @@ public class MonitorTask {
             String msg = String.format("%s %s 任务 checkpoint失败： %s", date, appName, history.get(0));
             log.warn(msg);
             // 根据预警级别发送预警
-            alarmByLevel(msg, ALARM_WARN_LEVEL, user.getMobile());
+            alarmByLevel(msg, ALARM_INFO_LEVEL, user.getMobile());
         } else {
             log.info(String.format("%s 任务 checkpoint 正常", appName));
         }
@@ -370,7 +371,7 @@ public class MonitorTask {
                 String msg = String.format("%s %s 任务 checkpoint状态超过%s MB，当前状态大小为%s MB", date, appName,
                     checkpointStateSizeMb, stateSizeMb);
                 // 根据预警级别发送预警
-                alarmByLevel(msg, ALARM_WARN_LEVEL, user.getMobile());
+                alarmByLevel(msg, ALARM_INFO_LEVEL, user.getMobile());
             } else {
                 log.info(String.format("%s 任务 checkpoint状态大小为 %s MB", appName, stateSizeMb));
             }
