@@ -16,11 +16,20 @@
             <if test="monitorKafkaDefine.group != null and monitorKafkaDefine.group != ''">
                 AND t.group = #{monitorKafkaDefine.group}
             </if>
+            <if test="monitorKafkaDefine.alarmLevel != null and monitorKafkaDefine.alarmLevel != ''">
+                AND t.alarmLevel = #{monitorKafkaDefine.alarmLevel}
+            </if>
+            <if test="monitorKafkaDefine.release == 0">
+                AND t.`release` = #{monitorKafkaDefine.release}
+            </if>
             <if test="monitorKafkaDefine.release != null and monitorKafkaDefine.release != ''">
-                AND t.release = #{monitorKafkaDefine.release}
+                AND t.`release` = #{monitorKafkaDefine.release}
+            </if>
+            <if test="monitorKafkaDefine.deleted == 0">
+                AND t.`deleted` = #{monitorKafkaDefine.deleted}
             </if>
             <if test="monitorKafkaDefine.deleted != null and monitorKafkaDefine.deleted != ''">
-                AND t.deleted = #{monitorKafkaDefine.deleted}
+                AND t.`deleted` = #{monitorKafkaDefine.deleted}
             </if>
             <if test="monitorKafkaDefine.maintainName != null and monitorKafkaDefine.maintainName != ''">
                 AND t.maintain_name = #{monitorKafkaDefine.maintainName}

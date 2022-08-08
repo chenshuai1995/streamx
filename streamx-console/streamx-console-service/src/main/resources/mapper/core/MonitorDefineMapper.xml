@@ -14,7 +14,7 @@
                 AND t.app_name like '%${monitorDefine.appName}%'
             </if>
             <if test="monitorDefine.recoverStartNode != null and monitorDefine.recoverStartNode != ''">
-                AND p.recover_start_node like '%${monitorDefine.recoverStartNode}%'
+                AND t.recover_start_node like '%${monitorDefine.recoverStartNode}%'
             </if>
             <if test="monitorDefine.alarmLevel != null and monitorDefine.alarmLevel != ''">
                 AND t.alarm_level = #{monitorDefine.alarmLevel}
@@ -28,8 +28,11 @@
             <if test="monitorDefine.release != null and monitorDefine.release != ''">
                 AND t.`release` = #{monitorDefine.release}
             </if>
+            <if test="monitorDefine.deleted == 0">
+                AND t.`deleted` = #{monitorDefine.deleted}
+            </if>
             <if test="monitorDefine.deleted != null and monitorDefine.deleted != ''">
-                AND t.deleted = #{monitorDefine.deleted}
+                AND t.`deleted` = #{monitorDefine.deleted}
             </if>
             <if test="monitorDefine.maintainName != null and monitorDefine.maintainName != ''">
                 AND t.maintain_name = #{monitorDefine.maintainName}
